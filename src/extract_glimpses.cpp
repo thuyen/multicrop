@@ -38,12 +38,23 @@ void Crop2D(
 }
 
 at::Tensor crop2d(
-    const at::Tensor &X, // 2d image hwc
+    const at::Tensor &X, // 3d image hwc
     const at::Tensor &R, // boxes
     int pooled_height, int pooled_width, int stride=1
     ) {
-  auto output = X.type().zeros(
-      {R.size(0), pooled_height, pooled_width, X.size(-1)});
+
+  at::Tensor output;
+  int channels = 1;
+
+  if (X.dim() == 2) {
+    output = X.type().zeros(
+        {R.size(0), pooled_height, pooled_width});
+  } else {
+    channels = X.size(2);
+    output = X.type().zeros(
+        {R.size(0), pooled_height, pooled_width, channels});
+  }
+
 
   Crop2D<int16_t>(
       output.numel(),
@@ -51,7 +62,7 @@ at::Tensor crop2d(
       R.data<int16_t>(),
       X.size(0),
       X.size(1),
-      X.size(2),
+      channels,
       pooled_height,
       pooled_width,
       stride,
@@ -105,13 +116,23 @@ void Crop3D(
 }
 
 at::Tensor crop3d(
-    const at::Tensor &X, // 3d image thwc
+    const at::Tensor &X, // 4d image thwc
     const at::Tensor &R, // boxes
     int pooled_length, int pooled_height, int pooled_width,
     int stride=1
     ) {
-  auto output = X.type().zeros(
-      {R.size(0), pooled_length, pooled_height, pooled_width, X.size(-1)});
+
+  at::Tensor output;
+  int channels = 1;
+  if (X.dim() == 3) {
+    output = X.type().zeros(
+        {R.size(0), pooled_length, pooled_height, pooled_width});
+  } else {
+    channels = X.size(3);
+    output = X.type().zeros(
+        {R.size(0), pooled_length, pooled_height, pooled_width, channels});
+  }
+
 
   Crop3D<int16_t>(
       output.numel(),
@@ -120,7 +141,7 @@ at::Tensor crop3d(
       X.size(0),
       X.size(1),
       X.size(2),
-      X.size(3),
+      channels,
       pooled_length,
       pooled_height,
       pooled_width,
