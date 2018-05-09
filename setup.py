@@ -34,6 +34,7 @@ ext_modules = []
 extension = CppExtension(
     name='multicrop',
     sources = [
+        'src/ops.cpp',
         'src/extract_glimpses.cpp',
     ],
     extra_compile_args={'cxx': ['-g', '-fopenmp']})

@@ -1,5 +1,6 @@
-#include <torch/torch.h>
 //#include <ATen/ATen.h>
+//
+#include <torch/torch.h>
 
 template <typename T>
 void Crop2DF(
@@ -78,7 +79,8 @@ void Crop2DL(
 at::Tensor crop2d(
     const at::Tensor &X, // 3d image hwc
     const at::Tensor &R, // boxes
-    int pooled_height, int pooled_width, int stride, bool first
+    int pooled_height, int pooled_width,
+    int stride=1, bool first=false
     ) {
 
   at::Tensor output;
@@ -156,7 +158,7 @@ void Crop3DF(
     int col = pos[2] - (pooled_width/2  - w)*stride;
 
     if (len < 0) len = 0;
-    if (len >= length) col = length - 1;
+    if (len >= length) len = length - 1;
 
     if (row < 0) row = 0;
     if (row >= height) row = height - 1;
@@ -200,7 +202,7 @@ void Crop3DL(
     int col = pos[2] - (pooled_width/2  - w)*stride;
 
     if (len < 0) len = 0;
-    if (len >= length) col = length - 1;
+    if (len >= length) len = length - 1;
 
     if (row < 0) row = 0;
     if (row >= height) row = height - 1;
@@ -219,7 +221,7 @@ at::Tensor crop3d(
     const at::Tensor &X, // 4d image thwc
     const at::Tensor &R, // boxes
     int pooled_length, int pooled_height, int pooled_width,
-    int stride, bool first
+    int stride=1, bool first=false
     ) {
 
   at::Tensor output;
@@ -270,8 +272,3 @@ at::Tensor crop3d(
   return output;
 }
 
-//PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-PYBIND11_MODULE(multicrop, m) {
-  m.def("crop2d", &crop2d, "crop2d");
-  m.def("crop3d", &crop3d, "crop3d");
-}
