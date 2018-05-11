@@ -31,13 +31,26 @@ from torch.utils.cpp_extension import CppExtension, CUDAExtension
 ext_modules = []
 
 #https://stackoverflow.com/questions/45600866/add-c-function-to-existing-python-module-with-pybind11
-extension = CppExtension(
-    name='multicrop',
-    sources = [
-        'src/ops.cpp',
-        'src/extract_glimpses.cpp',
-    ],
-    extra_compile_args={'cxx': ['-g', '-fopenmp']})
+
+if torch.cuda.is_available():
+    extension = CUDAExtension(
+        name='multicrop',
+        sources = [
+            'src/gpu_ops.cpp',
+            'src/extract_glimpses_cuda.cu',
+            'src/extract_glimpses.cpp',
+        ],
+        extra_compile_args={'cxx': ['-g', '-fopenmp'],
+                            'nvcc': ['-O2']})
+else:
+    extension = CppExtension(
+        name='multicrop',
+        sources = [
+            'src/cpu_ops.cpp',
+            'src/extract_glimpses.cpp',
+        ],
+        extra_compile_args={'cxx': ['-g', '-fopenmp']})
+
 ext_modules.append(extension)
 
 
