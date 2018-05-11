@@ -86,9 +86,11 @@ at::Tensor crop2d_gpu(
     ) {
 
   at::Tensor output;
-  int channels = 1;
+  int channels, off=0;
 
   if (X.dim() == 2) {
+    channels = 1;
+    off = 1;
     output = X.type().zeros(
         {R.size(0), pooled_height, pooled_width});
   } else if (first) {
@@ -96,7 +98,7 @@ at::Tensor crop2d_gpu(
     output = X.type().zeros(
         {R.size(0), channels, pooled_height, pooled_width});
   } else {
-    channels = X.size(-1);
+    channels = X.size(2);
     output = X.type().zeros(
         {R.size(0), pooled_height, pooled_width, channels});
   }
@@ -113,8 +115,8 @@ at::Tensor crop2d_gpu(
               output_size,
               X.data<cuda_scalar_t>(),
               R.data<int16_t>(),
-              X.size(0),
-              X.size(1),
+              X.size(1-off),
+              X.size(2-off),
               channels,
               pooled_height,
               pooled_width,
@@ -235,8 +237,10 @@ at::Tensor crop3d_gpu(
     ) {
 
   at::Tensor output;
-  int channels = 1;
+  int channels, off=0;
   if (X.dim() == 3) {
+    channels = 1;
+    off = 1;
     output = X.type().zeros(
         {R.size(0), pooled_length, pooled_height, pooled_width});
   } else if (first) {
@@ -244,7 +248,7 @@ at::Tensor crop3d_gpu(
     output = X.type().zeros(
         {R.size(0), channels, pooled_length, pooled_height, pooled_width});
   } else {
-    channels = X.size(-1);
+    channels = X.size(3);
     output = X.type().zeros(
         {R.size(0), pooled_length, pooled_height, pooled_width, channels});
   }
@@ -261,9 +265,9 @@ at::Tensor crop3d_gpu(
               output_size,
               X.data<cuda_scalar_t>(),
               R.data<int16_t>(),
-              X.size(0),
-              X.size(1),
-              X.size(2),
+              X.size(1-off),
+              X.size(2-off),
+              X.size(3-off),
               channels,
               pooled_length,
               pooled_height,
